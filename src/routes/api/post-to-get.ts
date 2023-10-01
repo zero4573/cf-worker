@@ -18,17 +18,17 @@ import { IRequest } from "itty-router";
 export default {
 	async post(request: IRequest): Promise<Response> {
 		const url = new URL(request.url);
-		const redirectUrl = url.searchParams.get('redirectUrl'); 
+		const redirectUrlStr = url.searchParams.get('redirectUrl'); 
 
-		if (!redirectUrl) {
+		if (!redirectUrlStr) {
 			return new Response('Bad request: Missing `redirectUrl` query param', { status: 400 });
 		}
 
 		const body = await request.text();
-		const urlEncodedBody = encodeURIComponent(body);
-		const redirectUrlWithParams=`${redirectUrl}?body=${urlEncodedBody}`;
+		const redirectUrl = new URL(redirectUrlStr);
+		redirectUrl.searchParams.append('body', body);
 
 		// The Response class has static methods to create common Response objects as a convenience
-		return Response.redirect(redirectUrlWithParams);
+		return Response.redirect(redirectUrl.toString());
 	},
 };
